@@ -1,1 +1,3 @@
 5b198d5ed79de3200b15c67028ae565f
+http://api.openweathermap.org/data/2.5/forecast?apikey=5b198d5ed79de3200b15c67028ae565f&mode=xml&units=imperial&zip=37122
+http://api.openweathermap.org/data/2.5/weather?apikey=5b198d5ed79de3200b15c67028ae565f&mode=xml&units=imperial&zip=37122
