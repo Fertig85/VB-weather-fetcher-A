@@ -1,0 +1,31 @@
+Dim WeatherRSS
+WeatherRSS = "http://weather.yahooapis.com/forecastrss?p=CAXX0773&u=c"
+
+Dim WinHttpReq, XMLData, objXML, weatherCity, weatherCondition, currTemp, highTemp, lowTemp
+Dim Response, Talker
+
+Set WinHttpReq = CreateObject("WinHttp.WinHttpRequest.5.1")
+
+WinHttpReq.Open "GET", WeatherRSS, False
+WinHttpReq.Send
+
+If (WinHttpReq.Status = 200) Then
+    XMLData = WinHttpReq.ResponseText
+
+    Set objXML = CreateObject("Microsoft.XMLDOM")
+    objXML.async = "False"
+    objXML.loadXML(XMLData)
+
+    weatherCity      = objXML.getElementsByTagName("yweather:location").item(0).attributes.getNamedItem("city").value
+    weatherCondition = objXML.getElementsByTagName("yweather:condition").item(0).attributes.getNamedItem("text").value
+    currTemp         = objXML.getElementsByTagName("yweather:condition").item(0).attributes.getNamedItem("temp").value
+    highTemp         = objXML.getElementsByTagName("yweather:forecast").item(0).attributes.getNamedItem("high").value
+    lowTemp          = objXML.getElementsByTagName("yweather:forecast").item(0).attributes.getNamedItem("low").value
+
+    weather = weatherCondition & " " & currTemp & " " & highTemp & " " & 
+
+lowTemp & " " + weatherCity & "."
+else        weather = "Sorry, I can't predict the weather today."
+end if
+
+msgbox(weather)
