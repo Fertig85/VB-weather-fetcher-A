@@ -1,0 +1,77 @@
+Option Explicit
+
+Sub TestGetWUData()
+' Showing how to create a DateSerial from year, month, day as integers
+Dim StartDate As Date
+Dim EndDate As Date
+
+    StartDate = DateSerial(2012, 9, 1)
+    EndDate = DateSerial(2012, 9, 5)
+    Call GetWUdata("INUEVOLE15", StartDate, EndDate)
+
+End Sub
+
+Sub GetWUdata(ID As String, StartDate As Date, EndDate As Date)
+' Get WU data. StartDate and EndDate are both inclusive.
+Dim oIE As Object
+Dim URL As String
+Dim d As Date
+
+    Application.ScreenUpdating = False
+    
+    Set oIE = CreateObject("InternetExplorer.Application")
+    ActiveSheet.Range("A1").Select
+    
+    ' loop through the date range
+    For d = StartDate To EndDate
+        URL = MakeURL(ID, d)
+        oIE.Navigate (URL)
+        Do: Loop Until Not (oIE.busy)
+        oIE.ExecWB 17, 0 '// SelectAll
+        oIE.ExecWB 12, 2 '// Copy selection
+        ActiveSheet.Paste
+        ' jump to the bottom of the data
+        ActiveSheet.Range("A1").End(xlDown).Offset(1, 0).Select
+    Next
+    
+    ' tidy up
+    oIE.Quit
+    Set oIE = Nothing
+    
+    ' Convert text to columns
+    ActiveSheet.Columns("A").TextToColumns Destination:=Range("A1")
+    
+    Call RemoveExtraHeaders
+    
+    Application.ScreenUpdating = True
+
+End Sub
+
+Function MakeURL(ID As String, ByVal d As Date) As String
+' Build a URL for Wunderground
+    MakeURL = "https://www.wunderground.com/weatherstation/WXDailyHistory.asp?" & _
+              "ID=" & ID & "&" & _
+              "day=" & Day(d) & "&" & _
+              "month=" & Month(d) & "&" & _
+              "year=" & Year(d) & "&" & _
+              "graphspan=day&format=1"
+End Function
+
+Sub RemoveExtraHeaders()
+' Remove extra header rows
+Dim RowToTest As Long
+
+    With ActiveWorkbook.Worksheets("Sheet1").Sort
+        .SetRange Range("A:O")
+        .Apply
+    End With
+    
+    For RowToTest = Cells(Rows.Count, 1).End(xlUp).Row To 1 Step -1
+        If Cells(RowToTest, 1).Value2 = "Time" Then
+            Rows(RowToTest).EntireRow.Delete
+        Else
+            Exit For
+        End If
+    Next
+
+End Sub
